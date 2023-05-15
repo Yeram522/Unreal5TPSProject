@@ -12,6 +12,7 @@
 #include "InputMappingContext.h"
 #include "Bullet.h"
 #include "EnemyFSM.h"
+#include "PlayerAnim.h"
 
 // Sets default values
 ATPSPlayer::ATPSPlayer()
@@ -20,7 +21,7 @@ ATPSPlayer::ATPSPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> 
-		TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/CosmoBunnyGirl/Mesh/SK_CosmoBunny_with_bones_in_dress.SK_CosmoBunny_with_bones_in_dress'"));
+		TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/AnimStarterPack/UE4_Mannequin/Mesh/SK_Mannequin.SK_Mannequin'"));
 	if (TempMesh.Succeeded())
 	{
 		GetMesh()->SetSkeletalMesh(TempMesh.Object);
@@ -45,23 +46,30 @@ ATPSPlayer::ATPSPlayer()
 
 	//Gun SK_Mesh Load
 	gunMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMeshComp"));
-	gunMeshComp->SetupAttachment(GetMesh());
+	gunMeshComp->SetupAttachment(GetMesh(),TEXT("hand_rSocket"));
 	ConstructorHelpers::FObjectFinder<USkeletalMesh> TmpGunMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/FPWeapon/Mesh/SK_FPGun.SK_FPGun'"));
 	if (TmpGunMesh.Succeeded())
 	{
 		gunMeshComp->SetSkeletalMesh(TmpGunMesh.Object);
-		gunMeshComp->SetRelativeLocation(FVector(-14, 52, 120));
+		
+		gunMeshComp->SetRelativeLocation_Direct(FVector(-17, 10, -3));
+		gunMeshComp->SetRelativeRotation(FRotator(0, 90, 0));
 		UE_LOG(LogTemp, Log, TEXT("Gun Load"));
 	}
 
-	//Regist Snioergun component
+	//Regist Snipergun component
 	sniperGunComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SniperGunComp"));
-	sniperGunComp->SetupAttachment(GetMesh());
+	sniperGunComp->SetupAttachment(GetMesh(),TEXT("hand_rSocket"));
 	ConstructorHelpers::FObjectFinder<UStaticMesh> TmpSniperMesh(TEXT("/Script/Engine.StaticMesh'/Game/SniperGun/sniper1.sniper1'"));
 	if (TmpSniperMesh.Succeeded())
 	{
 		sniperGunComp->SetStaticMesh(TmpSniperMesh.Object);
-		sniperGunComp->SetRelativeLocation(FVector(-22, 55, 120));
+
+		//Position Control
+		sniperGunComp->SetRelativeLocation(FVector(-42, 7, 1));
+		sniperGunComp->SetRelativeRotation(FRotator(0, 90, 0));
+
+		//Size Control
 		sniperGunComp->SetRelativeScale3D(FVector(0.15f));
 		UE_LOG(LogTemp, Log, TEXT("Sniper Gun Load"));
 	}
@@ -260,6 +268,14 @@ void ATPSPlayer::InputJump(const FInputActionValue& Value)
 
 void ATPSPlayer::InputFire(const FInputActionValue& Value)
 {
+	//Play Camera Shake
+	auto controller = GetWorld()->GetFirstPlayerController();
+	controller->PlayerCameraManager->StartCameraShake(cameraShake);
+
+	//Play Attack Animation
+	auto anim = Cast<UPlayerAnim>(GetMesh() -> GetAnimInstance());
+	anim->PlayAttackAnim();
+
 	if (bUsingGrenadeGun)
 	{
 		FTransform FirePosition = gunMeshComp->GetSocketTransform(TEXT("FirePosition"));

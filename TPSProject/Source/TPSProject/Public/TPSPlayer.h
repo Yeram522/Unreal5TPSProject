@@ -93,6 +93,11 @@ public:
 	void InputJump(const FInputActionValue& Value);
 	void InputFire(const FInputActionValue& Value);
 	void InputRun();
+
+	//Camera Shake Variable
+	UPROPERTY(EditDefaultsOnly, Category=Cameramotion)
+	TSubclassOf<class UCameraShakeBase> cameraShake;
+
 	//bool using grended gun
 	bool bUsingGranadeGun = true;
 
