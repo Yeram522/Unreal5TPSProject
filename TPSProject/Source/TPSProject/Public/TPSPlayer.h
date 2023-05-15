@@ -33,6 +33,12 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Camera)
 	class UCameraComponent* tpsCamComp;
 
+	//Walking Speed
+	UPROPERTY(EditAnyWhere, Category = PlayerSetting)
+	float walkSpeed = 200;
+	//Run Speed
+	UPROPERTY(EditAnyWhere, Category = PlayerSetting)
+	float runSpeed = 600;
 
 	//Gun Sk_Mesh
 	UPROPERTY(VisibleAnywhere, Category=GunMesh)
@@ -55,6 +61,9 @@ public:
 	class UInputAction* MoveRightAction;
 
 	UPROPERTY(VisibleAnywhere, Category = Input)
+	class UInputAction* RunAction;
+
+	UPROPERTY(VisibleAnywhere, Category = Input)
 	class UInputAction* LookUpAction;
 
 	UPROPERTY(VisibleAnywhere, Category = Input)
@@ -75,13 +84,15 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Input)
 	class UInputAction* ChangeSniperGunAction;
 
+	
+
 	void MoveRight(const FInputActionValue& Value);
 	void MoveForward(const FInputActionValue& Value);
 	void Turn(const FInputActionValue& Value);
 	void LookUp(const FInputActionValue& Value);
 	void InputJump(const FInputActionValue& Value);
 	void InputFire(const FInputActionValue& Value);
-
+	void InputRun();
 	//bool using grended gun
 	bool bUsingGranadeGun = true;
 

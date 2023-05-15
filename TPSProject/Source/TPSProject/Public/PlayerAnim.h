@@ -19,6 +19,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = PlayerAnim)
 	float speed = 0;
 
+	//Player Speed LR
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite,Category = PlayerAnim)
+	float direction = 0;
+
 	//function updating per time
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 

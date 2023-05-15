@@ -6,6 +6,7 @@
 #include <Camera/CameraComponent.h>
 #include <Blueprint/UserWidget.h>
 #include <Kismet/GameplayStatics.h>
+#include <GameFramework/CharacterMovementComponent.h>
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -100,6 +101,12 @@ ATPSPlayer::ATPSPlayer()
 	if (IA_Jump.Succeeded())
 		JumpAction = IA_Jump.Object;
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Run
+	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Run.IA_Run'"));
+	if (IA_Run.Succeeded())
+		RunAction = IA_Run.Object;
+
+
 	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Fire
 	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Fire.IA_Fire'"));
 	if (IA_Fire.Succeeded())
@@ -126,6 +133,9 @@ void ATPSPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Initiating Speed 
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* SubSystem =
@@ -170,6 +180,8 @@ void ATPSPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 		EnhancedInputComponent->BindAction(ChangeSniperGunAction, ETriggerEvent::Triggered, this, &ATPSPlayer::ChangeToSniperGun);
 		EnhancedInputComponent->BindAction(SniperAction, ETriggerEvent::Started, this, &ATPSPlayer::SniperAim);
 		EnhancedInputComponent->BindAction(SniperAction, ETriggerEvent::Completed, this, &ATPSPlayer::SniperAim);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &ATPSPlayer::InputRun);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ATPSPlayer::InputRun);
 
 	}
 }
@@ -222,7 +234,7 @@ void ATPSPlayer::Turn(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		float delta = GetWorld()->GetDeltaSeconds();
-		float speed = 0.3;
+		float speed = 3.0f;
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X* delta*speed);
 	}
@@ -301,6 +313,20 @@ void ATPSPlayer::InputFire(const FInputActionValue& Value)
 		}
 	}
 	
+}
+
+void ATPSPlayer::InputRun()
+{
+	auto movement = GetCharacterMovement();
+	//if Player Walking Mode
+	if (movement->MaxWalkSpeed > walkSpeed)
+	{
+		movement->MaxWalkSpeed = walkSpeed;
+	}
+	else
+	{
+		movement->MaxWalkSpeed = runSpeed;
+	}
 }
 
 void ATPSPlayer::ChangeToGrenadeGun()
