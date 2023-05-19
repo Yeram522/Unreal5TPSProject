@@ -134,6 +134,11 @@ ATPSPlayer::ATPSPlayer()
 	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Sniper.IA_Sniper'"));
 	if (IA_SniperAction.Succeeded())
 		SniperAction = IA_SniperAction.Object;
+
+	ConstructorHelpers::FObjectFinder<USoundBase> tempSound
+	(TEXT("/Game/SniperGun/Rifle.Rifle"));
+	if (tempSound.Succeeded())
+		bulletSound = tempSound.Object;
 }
 
 // Called when the game starts or when spawned
@@ -268,6 +273,8 @@ void ATPSPlayer::InputJump(const FInputActionValue& Value)
 
 void ATPSPlayer::InputFire(const FInputActionValue& Value)
 {
+	UGameplayStatics::PlaySound2D(GetWorld(), bulletSound);
+
 	//Play Camera Shake
 	auto controller = GetWorld()->GetFirstPlayerController();
 	controller->PlayerCameraManager->StartCameraShake(cameraShake);

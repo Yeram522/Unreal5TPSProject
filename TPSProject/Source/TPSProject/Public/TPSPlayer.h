@@ -98,6 +98,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category=Cameramotion)
 	TSubclassOf<class UCameraShakeBase> cameraShake;
 
+
+	//Shooting Sound
+	UPROPERTY(EditDefaultsOnly, Category=Sound)
+	class USoundBase* bulletSound;
+
 	//bool using grended gun
 	bool bUsingGranadeGun = true;
 
