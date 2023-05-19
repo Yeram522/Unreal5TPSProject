@@ -43,6 +43,7 @@ ATPSPlayer::ATPSPlayer()
 	tpsCamComp->SetupAttachment(springArmComp);
 
 	bUseControllerRotationYaw = true;
+	bUseControllerRotationPitch = true;
 
 	//Gun SK_Mesh Load
 	gunMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMeshComp"));
@@ -167,6 +168,8 @@ void ATPSPlayer::BeginPlay()
 
 	//Setting First Gun = Sniper
 	ChangeToSniperGun();
+
+	
 }
 
 // Called every frame
@@ -260,8 +263,10 @@ void ATPSPlayer::LookUp(const FInputActionValue& Value)
 
 	if (Controller != nullptr)
 	{
+		float delta = GetWorld()->GetDeltaSeconds();
+		float speed = 5.0f;
 		// add yaw and pitch input to controller
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerPitchInput(-LookAxisVector.Y *delta * speed);
 	}
 
 }

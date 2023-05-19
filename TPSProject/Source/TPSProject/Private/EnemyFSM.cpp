@@ -7,6 +7,7 @@
 #include <Kismet/GameplayStatics.h>
 #include <Components/CapsuleComponent.h>
 #include "TPSProject.h"
+#include "EnemyAnim.h"
 
 // Sets default values for this component's properties
 UEnemyFSM::UEnemyFSM()
@@ -31,6 +32,8 @@ void UEnemyFSM::BeginPlay()
 	// Get My Actor
 	me = Cast<AEnemy>(GetOwner());
 	
+	//Allocate UEnemyAnim*
+	anim = Cast<UEnemyAnim>(me->GetMesh()->GetAnimInstance());
 }
 
 
@@ -68,6 +71,8 @@ void UEnemyFSM::IdleState()
 		//initial currenTime
 		currentTime = 0;
 	}
+
+	anim->animState = mState;
 }
 
 void UEnemyFSM::MoveState()
@@ -85,6 +90,10 @@ void UEnemyFSM::MoveState()
 	{
 		//2. Change to Attack State
 		mState = EEnemyState::Attack;
+
+		anim->animState = mState;
+		anim->bAttackPlay = true;
+		currentTime = attackDelayTime;
 	}
 }
 
@@ -97,6 +106,8 @@ void UEnemyFSM::AttackState()
 	if (currentTime > attackRange)
 	{
 		PRINT_LOG(TEXT("ATTACK!!"));
+		currentTime = 0;
+		anim->bAttackPlay = true;
 	}
 	//2. initiate current Time
 	currentTime = 0;
@@ -109,6 +120,7 @@ void UEnemyFSM::AttackState()
 	{
 		//3. change to move state
 		mState = EEnemyState::Move;
+		anim->animState = mState;
 	}
  }
 
@@ -119,6 +131,8 @@ void UEnemyFSM::DamageState()
 	{
 		mState = EEnemyState::Idle;
 		currentTime = 0;
+		anim->animState = mState;
+
 	}
 }
 
@@ -134,6 +148,8 @@ void UEnemyFSM::DieState()
 	{
 		me->Destroy();
 	}
+
+	anim->animState = mState;
 }
 
 void UEnemyFSM::OnDamageProcess()

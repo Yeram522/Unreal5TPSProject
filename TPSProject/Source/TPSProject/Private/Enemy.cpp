@@ -11,7 +11,7 @@ AEnemy::AEnemy()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//1. Load SkeletalMesh Data
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn'"));
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/ZombotMike/Mesh/SM_Zombot_Mikey.SM_Zombot_Mikey'"));
 	//1-1. If Success Data Load
 	if (tempMesh.Succeeded())
 	{
@@ -23,6 +23,14 @@ AEnemy::AEnemy()
 
 	//Add EnemyFSM Component
 	fsm = CreateDefaultSubobject<UEnemyFSM>(TEXT("FSM"));
+
+	//Add Enemy Animation BluePrint
+	ConstructorHelpers::FClassFinder<UAnimInstance> tempClass(TEXT("/Script/Engine.AnimBlueprint'/Game/Blueprints/ABP_Enemy.ABP_Enemy_C'"));
+	if (tempClass.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(tempClass.Class);
+		UE_LOG(LogTemp, Warning, TEXT("AnimInstance Loaded"));
+	}
 }
 
 // Called when the game starts or when spawned

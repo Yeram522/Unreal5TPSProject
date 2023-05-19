@@ -87,4 +87,8 @@ public:
 	//Destroy Speed
 	UPROPERTY(EditAnywhere, Category = FSM)
 	float dieSpeed = 50.0f;
+
+	//Using Animation BluePrint
+	UPROPERTY()
+	class UEnemyAnim* anim;
 };
