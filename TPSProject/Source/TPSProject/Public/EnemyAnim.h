@@ -25,4 +25,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = FSMEvent)
 	void OnEndAttackAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = FSMEvent)
+	void PlayDamageAnim(FName sectionName);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = FSM)
+	bool bDiedone = false;
 };

@@ -138,6 +138,10 @@ void UEnemyFSM::DamageState()
 
 void UEnemyFSM::DieState()
 {
+	if (anim->bDiedone == false)
+	{
+		return;
+	}
 	// P = P0 + vy
 	FVector P0 = me->GetActorLocation();
 	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
@@ -160,13 +164,24 @@ void UEnemyFSM::OnDamageProcess()
 	if (hp > 0)
 	{
 		mState = EEnemyState::Damage;
+
+		currentTime = 0;
+
+		//Play Damage Animation
+		/*int32 index = FMath::RandRange(0, 1);
+		FString sectionName = FString::Printf(TEXT("Damage%d"), 0)*/;
+		FString sectionName = TEXT("Damage");
+		anim->PlayDamageAnim(FName(*sectionName));
 	}
 	else
 	{
 		mState = EEnemyState::Die;
 
 		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+		
+		anim->PlayDamageAnim(TEXT("Die"));
 	}
+
+	anim->animState = mState;
 }
 
