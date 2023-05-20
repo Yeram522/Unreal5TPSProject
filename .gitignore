@@ -4,6 +4,8 @@
 
 # Ignore Large Asset Files
 TPSProject/Content/missiontominerva/**
+TPSProject/Content/MSPresets/**
+TPSProject/Content/Megascans/**
 
 # Do not ignore git files in the root of the repo.
 !/.git*
