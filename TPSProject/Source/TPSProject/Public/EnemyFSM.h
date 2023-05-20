@@ -91,4 +91,14 @@ public:
 	//Using Animation BluePrint
 	UPROPERTY()
 	class UEnemyAnim* anim;
+
+	//AIController
+	UPROPERTY()
+	class AAIController* ai;
+
+	//Random Destination Pos
+	FVector randomPos;
+
+	//Get Random Position
+	bool GetRandomPositionInNavMesh(FVector centerLocation, float radius, FVector& dest);
 };
