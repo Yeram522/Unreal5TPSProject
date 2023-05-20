@@ -13,6 +13,8 @@
 #include "Bullet.h"
 #include "EnemyFSM.h"
 #include "PlayerAnim.h"
+#include "PlayerMove.h"
+#include "PlayerFire.h"
 
 // Sets default values
 ATPSPlayer::ATPSPlayer()
@@ -85,61 +87,9 @@ ATPSPlayer::ATPSPlayer()
 	if (DEFAULT_CONTEXT.Succeeded())
 		PlayerInputContext = DEFAULT_CONTEXT.Object;
 
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_MOVEFORWARD
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_MoveForward.IA_MoveForward'"));
-	if (IA_MOVEFORWARD.Succeeded())
-		MoveForwardAction = IA_MOVEFORWARD.Object;
 
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_MOVERIGHT
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_MoveRight.IA_MoveRight'"));
-	if (IA_MOVERIGHT.Succeeded())
-		MoveRightAction = IA_MOVERIGHT.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_LOOKUp
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_LookUp.IA_LookUp'"));
-	if (IA_LOOKUp.Succeeded())
-		LookUpAction = IA_LOOKUp.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Turn
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Turn.IA_Turn'"));
-	if (IA_Turn.Succeeded())
-		TurnAction = IA_Turn.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Jump
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Jump.IA_Jump'"));
-	if (IA_Jump.Succeeded())
-		JumpAction = IA_Jump.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Run
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Run.IA_Run'"));
-	if (IA_Run.Succeeded())
-		RunAction = IA_Run.Object;
-
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_Fire
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Fire.IA_Fire'"));
-	if (IA_Fire.Succeeded())
-		FireAction = IA_Fire.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_GrenadeGun
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_GrendadeGun.IA_GrendadeGun'"));
-	if (IA_GrenadeGun.Succeeded())
-		ChangeGrenadeGunAction = IA_GrenadeGun.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_SniperGun
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_SniperGun.IA_SniperGun'"));
-	if (IA_SniperGun.Succeeded())
-		ChangeSniperGunAction = IA_SniperGun.Object;
-
-	static ConstructorHelpers::FObjectFinder<UInputAction>IA_SniperAction
-	(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/IA_Sniper.IA_Sniper'"));
-	if (IA_SniperAction.Succeeded())
-		SniperAction = IA_SniperAction.Object;
-
-	ConstructorHelpers::FObjectFinder<USoundBase> tempSound
-	(TEXT("/Game/SniperGun/Rifle.Rifle"));
-	if (tempSound.Succeeded())
-		bulletSound = tempSound.Object;
+	playerMove = CreateDefaultSubobject<UPlayerMove>(TEXT("PlayerMove"));
+	playerFire = CreateDefaultSubobject<UPlayerFire>(TEXT("PlayerFire"));
 }
 
 // Called when the game starts or when spawned
@@ -147,8 +97,7 @@ void ATPSPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Initiating Speed 
-	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
+	
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -157,17 +106,7 @@ void ATPSPlayer::BeginPlay()
 			SubSystem->AddMappingContext(PlayerInputContext, 0);
 	}
 
-	//1. Create Sniper Widget Instance
-	_sniperUI = CreateWidget(GetWorld(), sniperUIFactory);
-
-	//2. Create Normal Aim UI CrossHair Intance
-	_crosshairUI = CreateWidget(GetWorld(), crosshairUIFactory);
-
-	//3. Regist Normal Aim UI
-	_crosshairUI->AddToViewport();
-
-	//Setting First Gun = Sniper
-	ChangeToSniperGun();
+	
 
 	
 }
@@ -184,224 +123,19 @@ void ATPSPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(MoveRightAction, ETriggerEvent::Triggered, this, &ATPSPlayer::MoveRight);
-		EnhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &ATPSPlayer::MoveForward);
-		EnhancedInputComponent->BindAction(LookUpAction, ETriggerEvent::Triggered, this, &ATPSPlayer::LookUp);
-		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ATPSPlayer::Turn);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ATPSPlayer::InputJump);
-		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &ATPSPlayer::InputFire);
-		EnhancedInputComponent->BindAction(ChangeGrenadeGunAction, ETriggerEvent::Triggered, this, &ATPSPlayer::ChangeToGrenadeGun);
-		EnhancedInputComponent->BindAction(ChangeSniperGunAction, ETriggerEvent::Triggered, this, &ATPSPlayer::ChangeToSniperGun);
-		EnhancedInputComponent->BindAction(SniperAction, ETriggerEvent::Started, this, &ATPSPlayer::SniperAim);
-		EnhancedInputComponent->BindAction(SniperAction, ETriggerEvent::Completed, this, &ATPSPlayer::SniperAim);
-		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Started, this, &ATPSPlayer::InputRun);
-		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ATPSPlayer::InputRun);
-
-	}
+	//Component Will Binding Player Input
+	playerMove->SetupInputBinding(PlayerInputComponent);
+	playerFire->SetupInputBinding(PlayerInputComponent);	
 }
 
-void ATPSPlayer::MoveRight(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 
-		// get right vector 
-		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-		// add movement 
-		AddMovementInput(RightDirection, MovementVector.X);
-	}
-}
-
-void ATPSPlayer::MoveForward(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 
-		// add movement 
-		AddMovementInput(ForwardDirection, MovementVector.Y);
-	}
-}
 
-void ATPSPlayer::Turn(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
-		float delta = GetWorld()->GetDeltaSeconds();
-		float speed = 3.0f;
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X* delta*speed);
-	}
-}
 
-void ATPSPlayer::LookUp(const FInputActionValue& Value)
-{
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
-		float delta = GetWorld()->GetDeltaSeconds();
-		float speed = 5.0f;
-		// add yaw and pitch input to controller
-		AddControllerPitchInput(-LookAxisVector.Y *delta * speed);
-	}
-
-}
-
-void ATPSPlayer::InputJump(const FInputActionValue& Value)
-{
-	Jump();
-}
-
-void ATPSPlayer::InputFire(const FInputActionValue& Value)
-{
-	UGameplayStatics::PlaySound2D(GetWorld(), bulletSound);
-
-	//Play Camera Shake
-	auto controller = GetWorld()->GetFirstPlayerController();
-	controller->PlayerCameraManager->StartCameraShake(cameraShake);
-
-	//Play Attack Animation
-	auto anim = Cast<UPlayerAnim>(GetMesh() -> GetAnimInstance());
-	anim->PlayAttackAnim();
-
-	if (bUsingGrenadeGun)
-	{
-		FTransform FirePosition = gunMeshComp->GetSocketTransform(TEXT("FirePosition"));
-		GetWorld()->SpawnActor<ABullet>(bulletFactory, FirePosition);
-	}
-	else //Using SniperGun
-	{
-		//LineTrace Start Position
-		FVector startPos = tpsCamComp->GetComponentLocation();
-		// LineTrace End Position
-		FVector endPos = tpsCamComp->GetComponentLocation() + tpsCamComp->GetForwardVector() * 5000;
-		//Parameter LineTrace collision info
-		FHitResult hitInfo;
-		// Parmeter setting collsion option 
-		FCollisionQueryParams params;
-		// except self in collsion
-		params.AddIgnoredActor(this);
-		//LineTrace collision sorting using Channel Filter(collsionInfo, startPoint, endPoint, sort Channel, collision Option)
-		bool bHit = GetWorld()->LineTraceSingleByChannel(hitInfo, startPos, endPos, ECC_Visibility, params);
-		//When LineTrace Hit
-		if (bHit)
-		{
-			//collide process -> Play bullet fragile effect
-
-			//bullet fragilss transform
-			FTransform bulletTrans;
-			//Allocate collision position
-			bulletTrans.SetLocation(hitInfo.ImpactPoint);
-			// Create Bullet Fragiles effect Instance
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), bulletEffectFactory, bulletTrans);
-
-			auto hitComp = hitInfo.GetComponent();
-			//1. if component has physics option
-			if (hitComp && hitComp->IsSimulatingPhysics())
-			{
-				//2. Need Force And Direction 
-				FVector force = -hitInfo.ImpactNormal * hitComp->GetMass()*500000;
-
-				//3. Give Force
-				hitComp->AddForce(force);
-			}
-
-			//Is Enemy?
-			auto enemy = hitInfo.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
-			if (enemy)
-			{
-				auto enemyFSM = Cast<UEnemyFSM>(enemy);
-				enemyFSM->OnDamageProcess();
-
-			}
-		}
-	}
-	
-}
-
-void ATPSPlayer::InputRun()
-{
-	auto movement = GetCharacterMovement();
-	//if Player Walking Mode
-	if (movement->MaxWalkSpeed > walkSpeed)
-	{
-		movement->MaxWalkSpeed = walkSpeed;
-	}
-	else
-	{
-		movement->MaxWalkSpeed = runSpeed;
-	}
-}
-
-void ATPSPlayer::ChangeToGrenadeGun()
-{
-	bUsingGrenadeGun = true;
-	sniperGunComp->SetVisibility(false);
-	gunMeshComp->SetVisibility(true);
-}
-
-void ATPSPlayer::ChangeToSniperGun()
-{
-	bUsingGrenadeGun = false;
-	sniperGunComp->SetVisibility(true);
-	gunMeshComp->SetVisibility(false);
-}
-
-void ATPSPlayer::SniperAim()
-{
-	//Do Not approch if not sniperMode
-	if (bUsingGrenadeGun)
-	{
-		return;
-	}
-	//Input process
-	if (bSniperAim == false)
-	{
-		//1. Active Sniper Aim mode
-		bSniperAim = true;
-		//2. Regist Sniper Aim UI
-		_sniperUI->AddToViewport();
-		//3. Setting Camera Field of Vew
-		tpsCamComp->SetFieldOfView(45.0f); 
-		//4. Remove Normal Aim UI
-		_crosshairUI->RemoveFromParent();
-	}
-	else
-	{
-		//1. Active Sniper Aim mode
-		bSniperAim = false;
-		//2. Regist Sniper Aim UI
-		_sniperUI->RemoveFromParent();
-		//3. Setting Camera Field of Vew
-		tpsCamComp->SetFieldOfView(90.0f);
-		//4. Regist Normal Aim UI
-		_crosshairUI->AddToViewport();
-	}
-}
 
 
 
