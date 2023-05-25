@@ -2,6 +2,7 @@
 
 
 #include "TPSPlayer.h"
+#include "TPSProject.h"
 #include <GameFramework/SpringArmComponent.h>
 #include <Camera/CameraComponent.h>
 #include <Blueprint/UserWidget.h>
@@ -97,7 +98,7 @@ void ATPSPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
+	hp = initialHp;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
@@ -124,6 +125,16 @@ void ATPSPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	onInputBindingDelegate.Broadcast(PlayerInputComponent);
+}
+
+void ATPSPlayer::OnHitEvent()
+{
+	PRINT_LOG(TEXT("Damaged!!!!"));
+	hp--;
+	if (hp <= 0)
+	{
+		PRINT_LOG(TEXT("Player is dead!!!!"));
+	}
 }
 
 

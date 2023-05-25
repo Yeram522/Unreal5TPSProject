@@ -103,12 +103,16 @@ void UEnemyFSM::MoveState()
 	req.SetAcceptanceRadius(3);
 	req.SetGoalLocation(destination);
 	//Create Queary for path Finder
+	ai->BuildPathfindingQuery(req, query);
+
+	//Get PathFinding Result
 	FPathFindingResult r = ns->FindPathSync(query);
 
 	//Get result of Path Finding
 	if (r.Result == ENavigationQueryResult::Success)
 	{
 		ai->MoveToLocation(destination);
+		UE_LOG(LogTemp, Warning, TEXT("Enmey See YOU"));
 	}
 	else
 	{
@@ -145,7 +149,7 @@ void UEnemyFSM::AttackState()
 	//2. Time to Attack
 	if (currentTime > attackRange)
 	{
-		PRINT_LOG(TEXT("ATTACK!!"));
+		//PRINT_LOG(TEXT("ATTACK!!"));
 		currentTime = 0;
 		anim->bAttackPlay = true;
 	}
