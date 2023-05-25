@@ -20,7 +20,10 @@ public:
 	{
 		//No Tick Func 
 		PrimaryComponentTick.bCanEverTick = false;
+		bWantsInitializeComponent = true;
 	};
+
+	virtual void InitializeComponent() override;
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
