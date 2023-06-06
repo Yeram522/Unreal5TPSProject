@@ -90,8 +90,6 @@ void UEnemyFSM::MoveState()
 	FVector destination = target->GetActorLocation();
 	//2. Direction
 	FVector dir = destination - me->GetActorLocation();
-	//3. Move to Direction
-	//me->AddMovementInput(dir.GetSafeNormal()); 
 	
 	//Get NavigationSystem Instance
 	auto ns = UNavigationSystemV1::GetNavigationSystem(GetWorld());
@@ -100,7 +98,7 @@ void UEnemyFSM::MoveState()
 	FPathFindingQuery query;
 	FAIMoveRequest req;
 	//Range of request
-	req.SetAcceptanceRadius(3);
+	req.SetAcceptanceRadius(10);
 	req.SetGoalLocation(destination);
 	//Create Queary for path Finder
 	ai->BuildPathfindingQuery(req, query);
@@ -112,7 +110,6 @@ void UEnemyFSM::MoveState()
 	if (r.Result == ENavigationQueryResult::Success)
 	{
 		ai->MoveToLocation(destination);
-		UE_LOG(LogTemp, Warning, TEXT("Enmey See YOU"));
 	}
 	else
 	{

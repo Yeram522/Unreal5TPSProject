@@ -31,6 +31,8 @@ AEnemy::AEnemy()
 		GetMesh()->SetAnimInstanceClass(tempClass.Class);
 		UE_LOG(LogTemp, Warning, TEXT("AnimInstance Loaded"));
 	}
+
+	
 }
 
 // Called when the game starts or when spawned
