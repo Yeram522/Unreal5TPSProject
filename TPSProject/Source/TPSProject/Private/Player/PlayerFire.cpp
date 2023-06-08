@@ -83,6 +83,10 @@ void UPlayerFire::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (isGrappling)
+	{
+		CableComp->SetVisibility(false);
+	}
 }
 
 void UPlayerFire::InputFire(const FInputActionValue& Value)
@@ -131,9 +135,10 @@ void UPlayerFire::InputFire(const FInputActionValue& Value)
 
 			isGrappling = true;
 
-			FVector force = -hitInfo.ImpactNormal * me->GetActorLocation() * 2500;
+			FVector force = -hitInfo.ImpactNormal * me->GetActorLocation() * 5000;
 
 			me->GetCharacterMovement()->AddForce(force);
+			me->AddMovementInput(force, 5000);
 		}
 	}
 	else //Using SniperGun
@@ -147,7 +152,7 @@ void UPlayerFire::InputFire(const FInputActionValue& Value)
 		//LineTrace Start Position
 		FVector startPos = tpsCamComp->GetComponentLocation();
 		// LineTrace End Position
-		FVector endPos = tpsCamComp->GetComponentLocation() + tpsCamComp->GetForwardVector() * 5000;
+		FVector endPos = tpsCamComp->GetComponentLocation() + tpsCamComp->GetForwardVector() * 2500;
 		//Parameter LineTrace collision info
 		FHitResult hitInfo;
 		// Parmeter setting collsion option 

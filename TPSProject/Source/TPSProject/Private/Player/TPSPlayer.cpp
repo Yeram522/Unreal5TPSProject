@@ -123,7 +123,13 @@ void ATPSPlayer::BeginPlay()
 void ATPSPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	if (Cast<UPlayerMove>(playerMove)->bBulletTime)
+	{
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.3f);
+	}
+	else
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
 }
 
 // Called to bind functionality to input

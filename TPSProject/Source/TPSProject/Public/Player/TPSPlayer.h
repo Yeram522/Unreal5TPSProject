@@ -59,6 +59,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Component)
 	class UPlayerBaseComponent* playerFire;
 
+	
 
 	//HP
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Health)
