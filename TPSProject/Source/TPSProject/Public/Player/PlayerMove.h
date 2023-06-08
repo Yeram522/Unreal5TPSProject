@@ -53,14 +53,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Input)
 	class UInputAction* JumpAction;
 
-	//Bullet Time
-	UPROPERTY()
-	bool bBulletTime = false;
-
-	UPROPERTY()
-	float DistanceToGround;
-
-
 	//Move-BindingFunc
 	void MoveRight(const FInputActionValue& Value);
 	void MoveForward(const FInputActionValue& Value);

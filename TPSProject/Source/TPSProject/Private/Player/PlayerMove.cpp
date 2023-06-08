@@ -2,9 +2,9 @@
 
 
 #include "Player/PlayerMove.h"
-#include "Game/TPSProject.h"
 #include "EnhancedInputComponent.h"
 #include <Camera/CameraComponent.h>
+
 UPlayerMove::UPlayerMove()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -53,29 +53,7 @@ void UPlayerMove::TickComponent(float DeltaTime, enum ELevelTick TickType, FActo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	bool bIsInAir = me->GetCharacterMovement()->IsFalling();
-
-
-	float Distance = 0;
-
-	FVector CharacterLocation = me->GetActorLocation();
-	FFindFloorResult OutFloorResult;
-	me->GetCharacterMovement()->ComputeFloorDist(CharacterLocation, Distance, 200, OutFloorResult, 10);
-	Distance = OutFloorResult.FloorDist;
-
-	PRINT_LOG(TEXT("Distance!!!! %f"), Distance);
-
-
-	if (bIsInAir && Distance > 190 )
-	{
-		bBulletTime = true;
-	}
-	else if(!bIsInAir)
-	{
-		bBulletTime = false;
-	}
-
-
+	
 }
 
 void UPlayerMove::Turn(const FInputActionValue& Value)

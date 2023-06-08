@@ -16,6 +16,7 @@
 #include "Action/PlayerAnim.h"
 #include "Player/PlayerMove.h"
 #include "Player/PlayerFire.h"
+#include "Player/PlayerBulletTime.h"
 #include "CableComponent.h"
 
 // Sets default values
@@ -97,7 +98,7 @@ ATPSPlayer::ATPSPlayer()
 
 
 	playerMove = CreateDefaultSubobject<UPlayerMove>(TEXT("PlayerMove"));
-	//playerFire = CreateDefaultSubobject<UPlayerFire>(TEXT("PlayerFire"));
+	playerBulletTime = CreateDefaultSubobject<UPlayerBulletTime>(TEXT("PlayerBulletTime"));
 }
 
 // Called when the game starts or when spawned
@@ -124,7 +125,7 @@ void ATPSPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (Cast<UPlayerMove>(playerMove)->bBulletTime)
+	if (Cast<UPlayerBulletTime>(playerBulletTime)->bBulletTime)
 	{
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.3f);
 	}

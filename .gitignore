@@ -6,7 +6,7 @@
 TPSProject/Content/missiontominerva/**
 TPSProject/Content/MSPresets/**
 TPSProject/Content/Megascans/**
-
+TPSProject/Content/Worm/**
 # Do not ignore git files in the root of the repo.
 !/.git*
 
