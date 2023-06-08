@@ -16,6 +16,7 @@
 #include "Action/PlayerAnim.h"
 #include "Player/PlayerMove.h"
 #include "Player/PlayerFire.h"
+#include "CableComponent.h"
 
 // Sets default values
 ATPSPlayer::ATPSPlayer()
@@ -61,6 +62,12 @@ ATPSPlayer::ATPSPlayer()
 		UE_LOG(LogTemp, Log, TEXT("Gun Load"));
 	}
 
+	//Add Cable Component To Gun
+	CableComp = CreateDefaultSubobject<UCableComponent>(TEXT("Cable"));
+	CableComp->SetupAttachment(gunMeshComp);
+	CableComp->SetRelativeLocation(FVector(2, 58, 11));
+	CableComp->NumSegments = 1;
+	CableComp->SetVisibility(false);
 	//Regist Snipergun component
 	sniperGunComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SniperGunComp"));
 	sniperGunComp->SetupAttachment(GetMesh(),TEXT("hand_rSocket"));

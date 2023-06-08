@@ -21,6 +21,8 @@ public:
 
 	virtual void SetupInputBinding(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	UPROPERTY()
 	class UCameraComponent* tpsCamComp;
 
@@ -33,6 +35,15 @@ public:
 	//SnimperGunStaticMesh
 	UPROPERTY()
 	class UStaticMeshComponent* sniperGunComp;
+
+	UPROPERTY()
+	class UCableComponent* CableComp;
+
+	UPROPERTY()
+	FVector CableEndLocation;
+
+	UPROPERTY()
+	bool isGrappling = false;
 public:
 	//Bullet Factory
 	UPROPERTY(EditDefaultsOnly, Category = BulletFactory)

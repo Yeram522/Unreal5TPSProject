@@ -11,5 +11,8 @@ public class TPSProject : ModuleRules
         PublicIncludePaths.AddRange(new string[] { "TPSProject/Public" });
 
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "EnhancedInput","UMG", "NavigationSystem", "AIModule" });
-	}
+
+        PrivateDependencyModuleNames.AddRange(new string[] { "CableComponent" });
+
+    }
 }

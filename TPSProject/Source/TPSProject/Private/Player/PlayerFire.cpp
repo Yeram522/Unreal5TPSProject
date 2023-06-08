@@ -9,9 +9,12 @@
 #include <Blueprint/UserWidget.h>
 #include <Camera/CameraComponent.h>
 #include "Action/PlayerAnim.h"
+#include "CableComponent.h"
 
 UPlayerFire::UPlayerFire()
 {
+	PrimaryComponentTick.bCanEverTick = true;
+
 	//Get Bullet Sound
 	ConstructorHelpers::FObjectFinder<USoundBase> tempSound
 	(TEXT("/Game/SniperGun/Rifle.Rifle"));
@@ -46,6 +49,7 @@ void UPlayerFire::BeginPlay()
 	tpsCamComp = me->tpsCamComp;
 	gunMeshComp = me->gunMeshComp;
 	sniperGunComp = me->sniperGunComp;
+	CableComp = me->CableComp;
 
 	//1. Create Sniper Widget Instance
 	_sniperUI = CreateWidget(GetWorld(), sniperUIFactory);
@@ -75,25 +79,71 @@ void UPlayerFire::SetupInputBinding(UInputComponent* PlayerInputComponent)
 	}
 }
 
+void UPlayerFire::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+}
+
 void UPlayerFire::InputFire(const FInputActionValue& Value)
 {
-	UGameplayStatics::PlaySound2D(GetWorld(), bulletSound);
-
-	//Play Camera Shake
-	auto controller = GetWorld()->GetFirstPlayerController();
-	controller->PlayerCameraManager->StartCameraShake(cameraShake);
-
 	//Play Attack Animation
 	auto anim = Cast<UPlayerAnim>(me->GetMesh()->GetAnimInstance());
 	anim->PlayAttackAnim();
 
-	if (bUsingGrenadeGun)
+	if (bUsingGrenadeGun) //Using grapping  Gun
 	{
-		FTransform FirePosition = gunMeshComp->GetSocketTransform(TEXT("FirePosition"));
-		GetWorld()->SpawnActor<ABullet>(bulletFactory, FirePosition);
+		/*FTransform FirePosition = gunMeshComp->GetSocketTransform(TEXT("FirePosition"));
+		GetWorld()->SpawnActor<ABullet>(bulletFactory, FirePosition);*/
+
+		//LineTrace Start Position
+		FVector startPos = tpsCamComp->GetComponentLocation();
+		// LineTrace End Position
+		FVector endPos = tpsCamComp->GetComponentLocation() + tpsCamComp->GetForwardVector() * 5000;
+		//Parameter LineTrace collision info
+		FHitResult hitInfo;
+		// Parmeter setting collsion option 
+		FCollisionQueryParams params;
+		// except self in collsion
+		params.AddIgnoredActor(me);
+		//LineTrace collision sorting using Channel Filter(collsionInfo, startPoint, endPoint, sort Channel, collision Option)
+		bool bHit = GetWorld()->LineTraceSingleByChannel(hitInfo, startPos, endPos, ECC_Visibility, params);
+		//When LineTrace Hit
+		if (bHit)
+		{
+			//collide process -> Play bullet fragile effect
+
+			//bullet fragilss transform
+			FTransform bulletTrans;
+			//Allocate collision position
+			bulletTrans.SetLocation(hitInfo.ImpactPoint);
+			
+			CableComp->SetVisibility(true);
+
+			
+
+			FComponentReference ref;
+			ref.OtherActor = hitInfo.GetActor();
+			CableComp->AttachEndTo = ref;
+			CableEndLocation = ref.OtherActor->GetActorTransform().InverseTransformPosition(bulletTrans.GetLocation());
+
+			CableComp->EndLocation = CableEndLocation;
+
+			isGrappling = true;
+
+			FVector force = -hitInfo.ImpactNormal * me->GetActorLocation() * 2500;
+
+			me->GetCharacterMovement()->AddForce(force);
+		}
 	}
 	else //Using SniperGun
 	{
+		UGameplayStatics::PlaySound2D(GetWorld(), bulletSound);
+
+		//Play Camera Shake
+		auto controller = GetWorld()->GetFirstPlayerController();
+		controller->PlayerCameraManager->StartCameraShake(cameraShake);
+
 		//LineTrace Start Position
 		FVector startPos = tpsCamComp->GetComponentLocation();
 		// LineTrace End Position
